@@ -10,7 +10,8 @@ package frc.robot;
 
 
 import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.DigitalInput;
+//import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
@@ -35,8 +36,11 @@ public class Robot extends TimedRobot {
   private final XboxController controller = new XboxController(0);
   //private double mappedValue;
   private static MapValues fixedValue = new MapValues();
-  private AnalogInput test = new AnalogInput(1);
-  private Spark motor = new Spark(4);
+  //private Spark motor = new Spark(4);
+  private AnalogInput leftIR = new AnalogInput(0);
+  private AnalogInput rightIR = new AnalogInput(1);
+  private AnalogInput servoFeedback = new AnalogInput(2);
+  private DigitalInput button = new DigitalInput(8);
 
 
 
@@ -50,8 +54,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
-    SmartDashboard.putData("Auto choices", m_chooser);
-    SmartDashboard.putNumber("analog in", test.getVoltage());
+
   }
 
   /**
@@ -65,6 +68,11 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     //SmartDashboard.putNumber("converted Value", mappedValue);
+    SmartDashboard.putData("Auto choices", m_chooser);
+    SmartDashboard.putNumber("left voltage", leftIR.getVoltage());
+    SmartDashboard.putNumber("right voltage", rightIR.getValue());
+    SmartDashboard.putNumber("servoFeedback", servoFeedback.getVoltage());
+    SmartDashboard.putBoolean("button", button.get());
     
   }
 
@@ -82,7 +90,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() { 
     //m_arm.setClawJaw(.5);
-    m_arm.setClawTiltAngle(.5);
+    //m_arm.setClawTiltAngle(.5);
    // m_arm.setLift(.5);
 
 
@@ -110,12 +118,13 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    m_drivetrain.arcadeDrive(controller.getY(Hand.kLeft),controller.getX(Hand.kLeft));
-    double liftValue = fixedValue.mapNumber(controller.getY(Hand.kRight), -1.0, 1.0, 0.0, 1.0);
-    m_arm.setLift(liftValue);
-    m_arm.setClawTiltAngle(liftValue);
+    //m_drivetrain.arcadeDrive(controller.getY(Hand.kLeft),controller.getX(Hand.kLeft));
+    //double liftValue = fixedValue.mapNumber(controller.getY(Hand.kRight), -1.0, 1.0, 0.0, 1.0);
+    //m_arm.setLift(liftValue);
+    //m_arm.setClawTiltAngle(liftValue);
     //m_arm.setArmMotor(controller.getX(Hand.kRight ));
-    motor.set(controller.getX(Hand.kRight));
+    //motor.set(controller.getX(Hand.kRight));
+    m_drivetrain.arcadeDrive(0,0);
   }
 
   /**
