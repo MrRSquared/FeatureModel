@@ -66,4 +66,11 @@ public class RomiDrivetrain {
     return Math.PI * kWheelDiameterInch * (getRightEncoderCount() / kCountsPerRevolution);
   }
 
+  public double getRightEncoderSpeed() {
+    return m_rightEncoder.getRate();
+  }
+  public boolean getRightEncoderStopped() {
+    return m_rightEncoder.getStopped();
+  }
+
 }

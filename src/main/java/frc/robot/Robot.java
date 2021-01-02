@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;
+import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -53,7 +54,7 @@ public class Robot extends TimedRobot {
   // Range defaults to +- 8 G's
   Accelerometer m_accelerometer = new BuiltInAccelerometer();
 
-  private AnalogGyro m_gyro = new AnalogGyro(1);
+  private AnalogGyro m_gyro = new AnalogGyro(0);
 
   // Create the simulated gyro object, used for setting the gyro
   // angle. Like EncoderSim, this does not need to be commented out
@@ -97,6 +98,8 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Accelerometer X", m_accelerometer.getX());
     //SmartDashboard.putNumber("Accelerometer Y",  m_accelerometer.getY());
     SmartDashboard.putNumber("gyro", m_gyro.getAngle());
+    SmartDashboard.putNumber("leftEncoderSPeed", m_drivetrain.getRightEncoderSpeed());
+    SmartDashboard.putBoolean("Right Wheel is moving", m_drivetrain.getRightEncoderStopped());
   }
 
   /**
@@ -142,13 +145,13 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    //m_drivetrain.arcadeDrive(m_controller.getY(Hand.kLeft),m_controller.getX(Hand.kLeft));
+    m_drivetrain.arcadeDrive(m_controller.getY(Hand.kLeft),m_controller.getX(Hand.kLeft));
     //double liftValue = fixedValue.m_mapNumber(m_controller.getY(Hand.kRight), -1.0, 1.0, 0.0, 1.0);
     //m_arm.setLift(m_liftValue);
     //m_arm.setClawTiltAngle(m_liftValue);
     //m_arm.setArmMotor(m_controller.getX(Hand.kRight ));
     //motor.set(m_controller.getX(Hand.kRight));
-    m_drivetrain.arcadeDrive(0,0);
+    //m_drivetrain.arcadeDrive(0,0);
   }
 
   /**
