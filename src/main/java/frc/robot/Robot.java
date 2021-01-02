@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Sendable;
@@ -48,6 +49,7 @@ public class Robot extends TimedRobot {
   private final XboxController m_controller = new XboxController(0);
   //private double m_mappedValue;
   private static MapValues m_fixedValue = new MapValues();
+  private static DigitalOutput m_greenLed = new DigitalOutput(8);
   //private Spark m_motor = new Spark(4);
   //private AnalogInput m_leftIR = new AnalogInput(0);
   //private AnalogInput m_rightIR = new AnalogInput(1);
@@ -141,6 +143,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
+    m_greenLed.set(false);
     
     
   }
@@ -158,13 +161,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    m_drivetrain.arcadeDrive(m_controller.getY(Hand.kLeft),m_controller.getX(Hand.kLeft));
+    //m_drivetrain.arcadeDrive(m_controller.getY(Hand.kLeft),m_controller.getX(Hand.kLeft));
     //double liftValue = fixedValue.m_mapNumber(m_controller.getY(Hand.kRight), -1.0, 1.0, 0.0, 1.0);
     //m_arm.setLift(m_liftValue);
     //m_arm.setClawTiltAngle(m_liftValue);
     //m_arm.setArmMotor(m_controller.getX(Hand.kRight ));
     //motor.set(m_controller.getX(Hand.kRight));
-    //m_drivetrain.arcadeDrive(0,0);
+    m_drivetrain.arcadeDrive(0,0);
+    m_greenLed.set(true);
   }
 
   /**
