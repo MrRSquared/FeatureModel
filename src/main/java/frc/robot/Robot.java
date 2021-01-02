@@ -7,14 +7,22 @@
 
 package frc.robot;
 
-
-
+import edu.wpi.first.hal.SimDevice;
+import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Sendable;
 //import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.interfaces.Accelerometer;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -33,14 +41,25 @@ public class Robot extends TimedRobot {
 
   private final RomiDrivetrain m_drivetrain = new RomiDrivetrain();
   private final Arm m_arm = new Arm();
-  private final XboxController controller = new XboxController(0);
-  //private double mappedValue;
-  private static MapValues fixedValue = new MapValues();
-  //private Spark motor = new Spark(4);
-  private AnalogInput leftIR = new AnalogInput(0);
-  private AnalogInput rightIR = new AnalogInput(1);
-  private AnalogInput servoFeedback = new AnalogInput(2);
-  private DigitalInput button = new DigitalInput(8);
+  private final XboxController m_controller = new XboxController(0);
+  //private double m_mappedValue;
+  private static MapValues m_fixedValue = new MapValues();
+  //private Spark m_motor = new Spark(4);
+  //private AnalogInput m_leftIR = new AnalogInput(0);
+  //private AnalogInput m_rightIR = new AnalogInput(1);
+  //private AnalogInput m_servoFeedback = new AnalogInput(2);
+  Ultrasonic m_ultrasonic = new Ultrasonic(10,11);
+  // Creates an object for the built-in accelerometer
+  // Range defaults to +- 8 G's
+  Accelerometer m_accelerometer = new BuiltInAccelerometer();
+
+  private AnalogGyro m_gyro = new AnalogGyro(1);
+
+  // Create the simulated gyro object, used for setting the gyro
+  // angle. Like EncoderSim, this does not need to be commented out
+  // when deploying code to the roboRIO.
+  private AnalogGyroSim m_gyroSim = new AnalogGyroSim(m_gyro);
+
 
 
 
@@ -54,6 +73,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
+    
 
   }
 
@@ -69,11 +89,14 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     //SmartDashboard.putNumber("converted Value", mappedValue);
     SmartDashboard.putData("Auto choices", m_chooser);
-    SmartDashboard.putNumber("left voltage", leftIR.getVoltage());
-    SmartDashboard.putNumber("right voltage", rightIR.getValue());
-    SmartDashboard.putNumber("servoFeedback", servoFeedback.getVoltage());
-    SmartDashboard.putBoolean("button", button.get());
-    
+    //SmartDashboard.putNumber("left voltage", m_leftIR.getVoltage());
+    //SmartDashboard.putNumber("right voltage", m_rightIR.getValue());
+    //SmartDashboard.putNumber("servoFeedback", m_servoFeedback.getVoltage());
+    //SmartDashboard.putBoolean("button", m_button.get());
+    SmartDashboard.putNumber("Distance", m_ultrasonic.getRangeInches());
+    SmartDashboard.putNumber("Accelerometer X", m_accelerometer.getX());
+    //SmartDashboard.putNumber("Accelerometer Y",  m_accelerometer.getY());
+    SmartDashboard.putNumber("gyro", m_gyro.getAngle());
   }
 
   /**
@@ -92,6 +115,7 @@ public class Robot extends TimedRobot {
     //m_arm.setClawJaw(.5);
     //m_arm.setClawTiltAngle(.5);
    // m_arm.setLift(.5);
+ 
 
 
   }
@@ -118,12 +142,12 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    //m_drivetrain.arcadeDrive(controller.getY(Hand.kLeft),controller.getX(Hand.kLeft));
-    //double liftValue = fixedValue.mapNumber(controller.getY(Hand.kRight), -1.0, 1.0, 0.0, 1.0);
-    //m_arm.setLift(liftValue);
-    //m_arm.setClawTiltAngle(liftValue);
-    //m_arm.setArmMotor(controller.getX(Hand.kRight ));
-    //motor.set(controller.getX(Hand.kRight));
+    //m_drivetrain.arcadeDrive(m_controller.getY(Hand.kLeft),m_controller.getX(Hand.kLeft));
+    //double liftValue = fixedValue.m_mapNumber(m_controller.getY(Hand.kRight), -1.0, 1.0, 0.0, 1.0);
+    //m_arm.setLift(m_liftValue);
+    //m_arm.setClawTiltAngle(m_liftValue);
+    //m_arm.setArmMotor(m_controller.getX(Hand.kRight ));
+    //motor.set(m_controller.getX(Hand.kRight));
     m_drivetrain.arcadeDrive(0,0);
   }
 
