@@ -8,11 +8,14 @@
 package frc.robot;
 
 import edu.wpi.first.hal.SimDevice;
+import edu.wpi.first.hal.SimDouble;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Sendable;
 //import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -54,12 +57,16 @@ public class Robot extends TimedRobot {
   // Range defaults to +- 8 G's
   Accelerometer m_accelerometer = new BuiltInAccelerometer();
 
-  private AnalogGyro m_gyro = new AnalogGyro(0);
+  //private AnalogGyro m_gyro = new AnalogGyro(0);
+  private final Gyro m_gyro = new ADXRS450_Gyro();
 
   // Create the simulated gyro object, used for setting the gyro
   // angle. Like EncoderSim, this does not need to be commented out
   // when deploying code to the roboRIO.
-  private AnalogGyroSim m_gyroSim = new AnalogGyroSim(m_gyro);
+  //private AnalogGyroSim m_gyroSim = new AnalogGyroSim(m_gyro);
+  private SimDouble m_gyroAngleSim;
+  
+  
 
 
 
@@ -74,6 +81,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
+
     
 
   }
@@ -88,6 +96,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    m_gyroAngleSim =
+    new SimDeviceSim("ADXRS450_Gyro" + "[" + SPI.Port.kOnboardCS0.value + "]")
+          .getDouble("Angle");
+    var batteryVoltage = RobotController.getBatteryVoltage();
     //SmartDashboard.putNumber("converted Value", mappedValue);
     SmartDashboard.putData("Auto choices", m_chooser);
     //SmartDashboard.putNumber("left voltage", m_leftIR.getVoltage());
@@ -97,9 +109,10 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Distance", m_ultrasonic.getRangeInches());
     SmartDashboard.putNumber("Accelerometer X", m_accelerometer.getX());
     //SmartDashboard.putNumber("Accelerometer Y",  m_accelerometer.getY());
-    SmartDashboard.putNumber("gyro", m_gyro.getAngle());
+    SmartDashboard.putNumber("gyro", m_gyroAngleSim.get());
     SmartDashboard.putNumber("leftEncoderSPeed", m_drivetrain.getRightEncoderSpeed());
     SmartDashboard.putBoolean("Right Wheel is moving", m_drivetrain.getRightEncoderStopped());
+    SmartDashboard.putNumber("battery", batteryVoltage);
   }
 
   /**
