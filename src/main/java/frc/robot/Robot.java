@@ -7,29 +7,25 @@
 
 package frc.robot;
 
-import edu.wpi.first.hal.SimDevice;
-import edu.wpi.first.hal.SimDouble;
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.Sendable;
-//import edu.wpi.first.wpilibj.Spark;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;
+
 import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Sensors.RomiGyro;
+import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.RomiDrivetrain;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -48,32 +44,24 @@ public class Robot extends TimedRobot {
   private final Arm m_arm = new Arm();
   private final XboxController m_controller = new XboxController(0);
   //private double m_mappedValue;
-  private static MapValues m_fixedValue = new MapValues();
-  private static DigitalOutput m_greenLed = new DigitalOutput(8);
+  private static MapValues m_tiltValue = new MapValues(-1,1,0,1);
+  private static MapValues m_liftValue = new MapValues(-1,1,0,1);
+  //private static DigitalOutput m_greenLed = new DigitalOutput(8);
   //private Spark m_motor = new Spark(4);
   //private AnalogInput m_leftIR = new AnalogInput(0);
   //private AnalogInput m_rightIR = new AnalogInput(1);
-  //private AnalogInput m_servoFeedback = new AnalogInput(2);
-  Ultrasonic m_ultrasonic = new Ultrasonic(10,11);
+  //private AnalogInput m_servoFeedback = new AnalogInput(0);
+  //private static Ultrasonic m_ultrasonic = new Ultrasonic(8,9);
+  
   // Creates an object for the built-in accelerometer
   // Range defaults to +- 8 G's
   Accelerometer m_accelerometer = new BuiltInAccelerometer();
 
-  //private AnalogGyro m_gyro = new AnalogGyro(0);
-  private final Gyro m_gyro = new ADXRS450_Gyro();
+  private DigitalInput ultraOut = new DigitalInput(8);
+  private DigitalOutput ultraIn = new DigitalOutput(9);
+  private AnalogInput voltage = new AnalogInput(0);
 
-  // Create the simulated gyro object, used for setting the gyro
-  // angle. Like EncoderSim, this does not need to be commented out
-  // when deploying code to the roboRIO.
-  //private AnalogGyroSim m_gyroSim = new AnalogGyroSim(m_gyro);
-  private SimDouble m_gyroAngleSim;
-  
-  
-
-
-
-
-
+  private RomiGyro m_gyro = new RomiGyro();
 
   /**
    * This function is run when the robot is first started up and should be
@@ -83,9 +71,9 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
-
+    // Starts the ultrasonic sensor running in automatic mode
+    //m_ultrasonic.setAutomaticMode(true);
     
-
   }
 
   /**
@@ -98,9 +86,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    m_gyroAngleSim =
-    new SimDeviceSim("ADXRS450_Gyro" + "[" + SPI.Port.kOnboardCS0.value + "]")
-          .getDouble("Angle");
     var batteryVoltage = RobotController.getBatteryVoltage();
     //SmartDashboard.putNumber("converted Value", mappedValue);
     SmartDashboard.putData("Auto choices", m_chooser);
@@ -108,13 +93,20 @@ public class Robot extends TimedRobot {
     //SmartDashboard.putNumber("right voltage", m_rightIR.getValue());
     //SmartDashboard.putNumber("servoFeedback", m_servoFeedback.getVoltage());
     //SmartDashboard.putBoolean("button", m_button.get());
-    SmartDashboard.putNumber("Distance", m_ultrasonic.getRangeInches());
+    //SmartDashboard.putNumber("Distance", m_ultrasonic.getRangeInches());
     SmartDashboard.putNumber("Accelerometer X", m_accelerometer.getX());
-    //SmartDashboard.putNumber("Accelerometer Y",  m_accelerometer.getY());
-    SmartDashboard.putNumber("gyro", m_gyroAngleSim.get());
+    SmartDashboard.putNumber("Accelerometer Y",  m_accelerometer.getY());
     SmartDashboard.putNumber("leftEncoderSPeed", m_drivetrain.getRightEncoderSpeed());
     SmartDashboard.putBoolean("Right Wheel is moving", m_drivetrain.getRightEncoderStopped());
     SmartDashboard.putNumber("battery", batteryVoltage);
+    SmartDashboard.putBoolean("UltraDistance", ultraOut.get());
+    SmartDashboard.putNumber("Voltage", voltage.getAverageVoltage());
+
+    //Gyro 
+    SmartDashboard.putNumber("Gyro X",m_gyro.getAngleX());
+    SmartDashboard.putNumber("Gyro X",m_gyro.getAngleY());
+    SmartDashboard.putNumber("Gyro X",m_gyro.getAngleZ());
+    
   }
 
   /**
@@ -133,6 +125,7 @@ public class Robot extends TimedRobot {
     //m_arm.setClawJaw(.5);
     //m_arm.setClawTiltAngle(.5);
    // m_arm.setLift(.5);
+   //m_ultrasonic.ping();
  
 
 
@@ -143,7 +136,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
-    m_greenLed.set(false);
+    m_drivetrain.arcadeDrive(0, 0);
+    ultraIn.set(true);
+
     
     
   }
@@ -161,14 +156,20 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    //m_drivetrain.arcadeDrive(m_controller.getY(Hand.kLeft),m_controller.getX(Hand.kLeft));
-    //double liftValue = fixedValue.m_mapNumber(m_controller.getY(Hand.kRight), -1.0, 1.0, 0.0, 1.0);
-    //m_arm.setLift(m_liftValue);
-    //m_arm.setClawTiltAngle(m_liftValue);
-    //m_arm.setArmMotor(m_controller.getX(Hand.kRight ));
+    m_drivetrain.arcadeDrive(m_controller.getX(Hand.kLeft),-m_controller.getY(Hand.kLeft));
+   
+    m_arm.setLift(m_liftValue.defaultRangeMapNumber(-m_controller.getY(Hand.kRight)));
+
+    m_arm.setClawTiltAngle(m_tiltValue.defaultRangeMapNumber(-m_controller.getX(Hand.kRight)));
+    if (m_controller.getRawButton(2)){
+      m_arm.setClawJaw(1);
+    } else if (m_controller.getRawButton(3)){
+      m_arm.setClawJaw(0);
+    }
+    
     //motor.set(m_controller.getX(Hand.kRight));
-    m_drivetrain.arcadeDrive(0,0);
-    m_greenLed.set(true);
+    //m_drivetrain.arcadeDrive(0,0);
+    // m_greenLed.set(true);
   }
 
   /**
@@ -184,6 +185,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledPeriodic() {
+    ultraIn.set(false);
   }
 
   /**

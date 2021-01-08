@@ -5,7 +5,7 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package frc.robot;
+package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.Servo;
 
@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.Servo;
 public class Arm {
   private static final Servo m_armLift = new Servo(2);
   private static final Servo m_clawTilt = new Servo(3);
-  //private static final Servo m_clawJaw = new Servo(4);
+  private static final Servo m_clawJaw = new Servo(4);
   //private static final PWMVictorSPX m_armMotor = new PWMVictorSPX(4);
   
 
@@ -35,10 +35,10 @@ public class Arm {
     m_clawTilt.set(clawTiltAngle);
 
   }
- /**  public void setClawJaw(double clawJaw){
+ public void setClawJaw(double clawJaw){
     m_clawJaw.set(clawJaw);
 
-  }*/
+  }
   /**public void setArmMotor(double motorSpeed){
     m_armMotor.set(motorSpeed);
   }*/
