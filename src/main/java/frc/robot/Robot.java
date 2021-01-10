@@ -7,6 +7,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -51,17 +54,24 @@ public class Robot extends TimedRobot {
   //private AnalogInput m_leftIR = new AnalogInput(0);
   //private AnalogInput m_rightIR = new AnalogInput(1);
   //private AnalogInput m_servoFeedback = new AnalogInput(0);
-  //private static Ultrasonic m_ultrasonic = new Ultrasonic(8,9);
+  private static Ultrasonic m_ultrasonic = new Ultrasonic(8,9);
   
   // Creates an object for the built-in accelerometer
   // Range defaults to +- 8 G's
   Accelerometer m_accelerometer = new BuiltInAccelerometer();
 
-  private DigitalInput ultraOut = new DigitalInput(8);
-  private DigitalOutput ultraIn = new DigitalOutput(9);
+  //private DigitalInput ultraOut = new DigitalInput(8);
+  //private DigitalOutput ultraIn = new DigitalOutput(9);
   private AnalogInput voltage = new AnalogInput(0);
 
   private RomiGyro m_gyro = new RomiGyro();
+  NetworkTableEntry visionEntry;
+  private int centerX = -1;
+  private int width = -1;
+
+
+
+
 
   /**
    * This function is run when the robot is first started up and should be
@@ -72,7 +82,14 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     // Starts the ultrasonic sensor running in automatic mode
-    //m_ultrasonic.setAutomaticMode(true);
+    Ultrasonic.setAutomaticMode(true);
+    try{
+      visionEntry = NetworkTableInstance.getDefault().getTable("Vision").getEntry("data");
+
+    } catch(Exception e){
+      System.out.println("Something went wrong.");
+
+    }
     
   }
 
@@ -86,6 +103,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+
     var batteryVoltage = RobotController.getBatteryVoltage();
     //SmartDashboard.putNumber("converted Value", mappedValue);
     SmartDashboard.putData("Auto choices", m_chooser);
@@ -99,13 +117,16 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("leftEncoderSPeed", m_drivetrain.getRightEncoderSpeed());
     SmartDashboard.putBoolean("Right Wheel is moving", m_drivetrain.getRightEncoderStopped());
     SmartDashboard.putNumber("battery", batteryVoltage);
-    SmartDashboard.putBoolean("UltraDistance", ultraOut.get());
+    SmartDashboard.putNumber("UltraDistance", m_ultrasonic.getRangeInches());
     SmartDashboard.putNumber("Voltage", voltage.getAverageVoltage());
-
     //Gyro 
     SmartDashboard.putNumber("Gyro X",m_gyro.getAngleX());
     SmartDashboard.putNumber("Gyro X",m_gyro.getAngleY());
     SmartDashboard.putNumber("Gyro X",m_gyro.getAngleZ());
+    String[] data = visionEntry.getString("-1 -1").split(" ");
+    centerX = Integer.parseInt(data[0]);
+    width = Integer.parseInt(data[1]);
+    SmartDashboard.putNumber("object", centerX);
     
   }
 
@@ -137,7 +158,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     m_drivetrain.arcadeDrive(0, 0);
-    ultraIn.set(true);
+    //ultraIn.set(true);
 
     
     
@@ -185,7 +206,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledPeriodic() {
-    ultraIn.set(false);
+    //ultraIn.set(false);
   }
 
   /**
