@@ -229,6 +229,7 @@ if __name__ == "__main__":
     else:
         print("Setting up NetworkTables client for team {}".format(team))
         ntinst.startClientTeam(team)
+        ntinst.startDSClient()
 
     # start cameras
     for config in cameraConfigs:
